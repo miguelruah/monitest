@@ -1,6 +1,13 @@
 # Mid-level PHP test
 
-* index.php starts the demo and allows user input to choose data source (File, Database or Service mocker) and also to choose a specific user id.
-* classDBfuncLib.php includes 3 main DB commands: open connection using PDO, prepare a statement and execute the statement. it currently connects to a remote DB but can easily be changed
-* classCsvHandler.php includes the solution for the PHP test and is fairly documented and commented. It allows access to the CSV data by opening a remote/local file, accessing a remote/local DB and by mocking a web service (for the sake of the test, the login and fetch system was not coded and the pseudo-service returns the CSV data as a string upon being called)
-* monitestdata.csv is the remote file with the CSV lines (taken from Michael's Gist). The DB data is the same as here.
+- index.php starts the demo and allows the user to choose the data source (File, Database or Service mocker) and also to choose a specific user id.
+- classDBfuncLib.php includes 3 main DB commands: open connection using PDO, prepare a statement with named parameters and execute the statement.
+     It currently connects to a remote DB but that can easily be changed in __construct().
+     For that, transactions.sql quickly creates the table in a local DB. Amount was defined as float in the DB (they were kept as integer in the file).
+     monitestdata.csv is the remote file with the CSV lines (taken from Michael's Gist). The DB data is the same as here, though all Amounts in the file were kept as integers (they are float in the DB).
+- classCsvHandler.php includes the solution for the PHP test and is fairly documented and commented inside.
+     It allows access to the CSV data by opening a remote/local file, accessing a remote/local DB or by mocking a web service, user decides that through a drop-down in index.php
+     In the data provided from the service, amount also comes as a float because the data comes from the DB.
+     In order not to stray from the main focus of the test, the login and download service functions were not developed (the pseudo-service returns the CSV data as a string upon being called).
+     Currency rates are mocked through a function.
+

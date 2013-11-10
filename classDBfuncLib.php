@@ -26,7 +26,7 @@ class DBHandler {
   # Last edit: 2013.10.31                                                                                                              #
   # ---------------------------------------------------------------------------------------------------------------------------------- #
   public function __construct() {
-    $tmpDbHost = "localhost"; # 'http://www.dancingfire.org/localhost'; # "http://www.dancingfire.org/localhost"; #
+    $tmpDbHost = 'www.dancingfire.org';
     $tmpDbUser = "dancingf_moniusr";
     $tmpDbPass = "m0n1_u5r";
     $tmpDbName = "dancingf_moni";
