@@ -182,10 +182,37 @@ class CsvHandler {
   private function getCsvData($parSource) {
     switch ($parSource) {
       case 'S': # retrieve data from Service
-        # (i'm strangely assuming here that this web service doesn't ask for any login info and doesn't send me an access token
-        # and, instead, it generously just returns a CSV string full of private transactions info)
-        break;
+
+        # instead of a full web service, this is just a simple access to an external url (no login, no Auth token, etc)
+        # the right way to do this would be to create a separate class and make the web service easily available from anywhere in the app
+
+        $tmpLineSep = chr(10); # set ascii character 10 as the line separator
+
+        $tmpURL = "http://www.dancingfire.org/monitest/webservice.php";
+        $WSH = curl_init($tmpURL); # prepare WSH - the Web Service Handle
+        if ($WSH === false) {return false;} # Could not prepare the handle
+
+        curl_setopt($WSH, CURLOPT_RETURNTRANSFER, true); # get result straight from curl_exec()
+        $tmpCsvData = curl_exec($WSH);
+
+        if ($tmpCsvData === false) {return false;} # an error occurred and data could not be retrieved from the service => abort
+
+        curl_close($WSH);
+        $tmpCsvDataByLine = explode($tmpLineSep, $tmpCsvData); # cut string into lines using newline separator
+
+        for ($tmpNdx=1; $tmpNdx < count($tmpCsvDataByLine); $tmpNdx++) { # loop starts in 1 to dump header line
+
+          list($tmpUser, $tmpDate, $tmpAmount, $tmpCurrency) = explode(",", $tmpCsvDataByLine[$tmpNdx]); # quickly assign all 4 fields for current line
+
+          if ($this->validInt($tmpUser))          {$tmpReturnArray[($tmpNdx-1)]['user']     = $tmpUser;}     else {return false;}
+          if ($this->validDate($tmpDate))         {$tmpReturnArray[($tmpNdx-1)]['date']     = $tmpDate;}     else {return false;}
+          if ($this->validAmount($tmpAmount))     {$tmpReturnArray[($tmpNdx-1)]['amount']   = $tmpAmount;}   else {return false;}
+          if ($this->validCurrency($tmpCurrency)) {$tmpReturnArray[($tmpNdx-1)]['currency'] = $tmpCurrency;} else {return false;}
+        }
+
+        return $tmpReturnArray;
       case 'D': # retrieve data from Database
+
         $DBO = new DBHandler();
         if ($DBO === false) {return false;} # error opening DB => abort
 
@@ -204,8 +231,8 @@ class CsvHandler {
           $tmpIndex++;
         }
         return $tmpReturnArray;
-        break;
       case 'F': # retrieve data from external File
+
         if (($tmpFileHandle = fopen("monitestdata.csv", "r")) !== FALSE) {
           fgetcsv($tmpFileHandle); # skip the first row with headers
           $tmpIndex = 0;
@@ -224,10 +251,8 @@ class CsvHandler {
         } else {
           return false; # CSV file not found or not opened => abort
         }
-        break;
       default:  # unspecified or invalid source => abort
         return false;
-        break;
     }
   }
   # ---------------------------------------------------------------------------------------------------------------------------------- #
@@ -278,14 +303,16 @@ class CsvHandler {
   # Last edit: 2013.11.09                                                                                                              #
   # ---------------------------------------------------------------------------------------------------------------------------------- #
   public function getTotalSentForUser($parUserId) {
-    if (!$weHaveCSV) {                                     # we only need to retrieve CSV data once for each CsvHandler object
-      $this->prepCurrencyRates();                          # retrieving currency rates
-      $this->arrTransactions = $this->getCsvData($this->source);     # retrieving data
-      if ($this->arrTransactions===false) {return false;}  # an error occurred
+    if (!$this->validInt($parUserId)) {return false;} # parameter is not a valid user_id
+    $parUserId = (string)$parUserId;
+
+    if (!$weHaveCSV) {                                           # we only need to retrieve CSV data once for each CsvHandler object
+      $this->prepCurrencyRates();                                # retrieving currency rates
+      $this->arrTransactions = $this->getCsvData($this->source); # retrieving data
+      if ($this->arrTransactions===false) {return false;}        # an error occurred
       $this->weHaveCSV = true;
     }
 
-    $parUserId = (string)$parUserId;
     $tmpNdx = 0;
     while ($this->arrTransactions[$tmpNdx]['amount']) {
       if ($this->arrTransactions[$tmpNdx]['user']==$parUserId) {

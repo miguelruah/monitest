@@ -18,7 +18,7 @@ print "        Data Source: <select name=\"datasource\" id=\"datasource\">\n";
 print "          <option value=\"0\">--- Choose ---</option>\n";
 print "          <option value=\"D\">Database</option>\n";
 print "          <option value=\"F\">File</option>\n";
-#print "          <option value=\"S\">Service</option>\n";
+print "          <option value=\"S\">Service</option>\n";
 print "        </select>&nbsp;&nbsp;\n";
 print "        User Id: <input type=\"text\" name=userid id=userid size=\"2\" maxlen=\"2\">\n";
 print "        <input type=\"text\" name=\"ihavebeenherebefore\" id=\"ihavebeenherebefore\" value=\"Yes!!\" style=\"display:none;\">\n";
